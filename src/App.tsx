@@ -53,8 +53,14 @@ const taprootScript = taprootScriptInfo.script;
 const taprootAddress = taprootScriptInfo.address;
 
 // Taproot: Single Leaf 2/3 Multisig
+const taprootScriptInfoNS = btc.p2tr_ns(2, schnorrPubKeys);
+console.log(taprootScriptInfoNS);
+//const taprootScriptNS = taprootScriptInfoNS.script;
+//const taprootAddressNS = taprootScriptInfoNS.address;
 
 // Taproot: Multi Leaf 2/3 Multisig (EXPERIMENTAL)
+const taprootScriptInfoMS = btc.p2tr_ms(2, schnorrPubKeys);
+console.log(taprootScriptInfoMS);
 
 function App() {
   const [count, setCount] = useState(0)
@@ -75,17 +81,21 @@ function App() {
       "address": multisigAddress
     },
     {
-      "title": "Taproot: Simple Public Key",
+      "title": "Taproot: Single Public Key",
       "publicKeys": [toHex(schnorrPubKey1)],
       "script": toHex(taprootScript),
       "address": taprootAddress
     },
-    /*{
-      "title": "Taproot: 2/3 Multisig, Single-Leaf"
+    {
+      "title": "Taproot: Single-Leaf 2/3 Multisig",
+      "publicKeys": schnorrPubKeys.map(p => toHex(p)),
+      //"script": toHex(taprootScriptNS),
+      //"address": taprootAddressNS
     },
     {
-      "title": "Taproot: 2/3 Multisig, Multi-Leaf"
-    }*/
+      "title": "Taproot: Multi-Leaf 2/3 Multisig",
+      "publicKeys": schnorrPubKeys.map(p => toHex(p)),
+    }
   ]
 
   return (
