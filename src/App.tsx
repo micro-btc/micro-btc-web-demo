@@ -1,114 +1,114 @@
-import { useState } from 'react'
 import './App.css'
 import * as btc from 'micro-btc-signer'
 import * as secp from '@noble/secp256k1'
-const toHex = secp.utils.bytesToHex;
+const toHex = secp.utils.bytesToHex
 
-// Public Keys
-let privKeys: Uint8Array[] = [];
-let pubKeys: Uint8Array[] = [];
-let schnorrPubKeys: Uint8Array[] = [];
-for (var i = 0; i < 3; i++) {
-  const privKey = secp.utils.randomPrivateKey();
-  privKeys.push(privKey);
-  const pubKey = secp.getPublicKey(privKey, true);
-  pubKeys.push(pubKey);
-  const schnorrPubKey = secp.schnorr.getPublicKey(privKey);
-  schnorrPubKeys.push(schnorrPubKey);
+type KeySet = {
+  privKey: Uint8Array,
+  ecdsaPubKey: Uint8Array,
+  schnorrPubKey: Uint8Array
 }
 
+let keySets: KeySet[] = []
+
+for (var i = 0; i < 3; i++) {
+  const privKey = secp.utils.randomPrivateKey()
+  keySets.push({
+    privKey: privKey,
+    ecdsaPubKey: secp.getPublicKey(privKey, true),
+    schnorrPubKey: secp.schnorr.getPublicKey(privKey)
+  })
+}
+
+type ScriptSection = {
+  title: string,
+  privateKeys?: string[],
+  pubKeys?: string[],
+  script?: string,
+  scriptHash?: string,
+  address?: string,
+  leafScripts?: string[],
+  pubKeyType?: string
+}
+
+let scriptSections: ScriptSection[] = []
+
+// Classic public key hash
+const classicPKHInfo = btc.p2pkh(keySets[0].ecdsaPubKey)
+scriptSections.push({
+  "title": "Classic Public Key Hash",
+  "privateKeys": [toHex(keySets[0].privKey)],
+  "pubKeys": [toHex(keySets[0].ecdsaPubKey)],
+  "script": toHex(classicPKHInfo.script),
+  "scriptHash": "",
+  "address": classicPKHInfo.address,
+  "pubKeyType": "ECDSA"
+})
+
 // Witness public key hash
-const pubKeyInfo = btc.p2wpkh(pubKeys[0]);
-const pubKeyScript = pubKeyInfo.script;
-const pkhAddress = pubKeyInfo.address;
+const witnessPKHInfo = btc.p2wpkh(keySets[0].ecdsaPubKey)
+scriptSections.push({
+  "title": "Witness Public Key Hash",
+  "privateKeys": [toHex(keySets[0].privKey)],
+  "pubKeys": [toHex(keySets[0].ecdsaPubKey)],
+  "script": toHex(witnessPKHInfo.script),
+  "scriptHash": "",
+  "address": witnessPKHInfo.address,
+  "pubKeyType": "ECDSA"
+})
 
-// Witness script hash of a public key hash
-const pubKeyHashScriptInfo = btc.p2pkh(pubKeys[0]);
-const pubKeyHashScript = pubKeyHashScriptInfo.script;
-const wshPubKeyHashScriptInfo = btc.p2wsh(pubKeyHashScriptInfo);
-const wshPubKeyHashScript = wshPubKeyHashScriptInfo.script;
-const wshPkhAddress = wshPubKeyHashScriptInfo.address;
+const multisigScriptInfo = btc.p2ms(2, keySets.map(k => k.ecdsaPubKey))
+const wshMultisigInfo = btc.p2wsh(multisigScriptInfo)
+scriptSections.push({
+  "title": "Witness Script Hash: 2/3 Multisig",
+  "privateKeys": keySets.map(k => toHex(k.privKey)),
+  "pubKeys": keySets.map(k => toHex(k.ecdsaPubKey)),
+  "script": toHex(multisigScriptInfo.script),
+  "scriptHash": toHex(wshMultisigInfo.script),
+  "address": wshMultisigInfo.address,
+  "pubKeyType": "ECDSA"
+})
 
-// Witness script hash of a 2/3 multisig
-const multisigScriptInfo = btc.p2ms(2, pubKeys);
-const multisigScript = multisigScriptInfo.script;
-const multisigScriptHashInfo = btc.p2wsh(multisigScriptInfo);
-const multisigScriptHash = multisigScriptHashInfo.script;
-const multisigAddress = multisigScriptHashInfo.address;
+const taprootScriptInfo = btc.p2tr(keySets[0].schnorrPubKey)
+scriptSections.push({
+  "title": "Taproot: Single Public Key",
+  "privateKeys": [toHex(keySets[0].privKey)],
+  "pubKeys": [toHex(keySets[0].schnorrPubKey)],
+  "script": toHex(taprootScriptInfo.script),
+  "address": taprootScriptInfo.address,
+  "pubKeyType": "Schnorr"
+})
 
-// Taproot of Simple public key
-const taprootScriptInfo = btc.p2tr(schnorrPubKeys[0]);
-const taprootScript = taprootScriptInfo.script;
-const taprootAddress = taprootScriptInfo.address;
-
-// Taproot: Multi-Leaf 2/3 Multisig
-const taprootLeafScriptsNS = btc.p2tr_ns(2, schnorrPubKeys);
-console.log(taprootLeafScriptsNS);
-const taprootScriptInfoNS = btc.p2tr(undefined, taprootLeafScriptsNS);
-console.log(taprootScriptInfoNS);
-const taprootScriptNS = taprootScriptInfoNS.script;
-const taprootAddressNS = taprootScriptInfoNS.address;
+const taprootLeafScriptsNS = btc.p2tr_ns(2, keySets.map(k => k.schnorrPubKey))
+const taprootScriptInfoNS = btc.p2tr(undefined, taprootLeafScriptsNS)
+scriptSections.push({
+  "title": "Taproot: Multi-Leaf 2/3 Multisig",
+  "privateKeys": keySets.map(k => toHex(k.privKey)),
+  "pubKeys": keySets.map(k => toHex(k.schnorrPubKey)),
+  "script": toHex(taprootScriptInfoNS.script),
+  "leafScripts": taprootLeafScriptsNS.map(s => toHex(s.script)),
+  "address": taprootScriptInfoNS.address,
+  "pubKeyType": "Schnorr"
+})
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  const sections = [
-    {
-      "title": "Witness Public Key Hash",
-      "privateKeys": [toHex(privKeys[0])],
-      "publicKeys": [toHex(pubKeys[0])],
-      "script": toHex(pubKeyScript),
-      "scriptHash": "",
-      "address": pkhAddress
-    },
-    {
-      "title": "Witness Script Hash: 2/3 Multisig",
-      "privateKeys": privKeys.map(p => toHex(p)),
-      "publicKeys": pubKeys.map(p => toHex(p)),
-      "script": toHex(multisigScript),
-      "scriptHash": toHex(multisigScriptHash),
-      "address": multisigAddress
-    },
-    {
-      "title": "Taproot: Single Public Key",
-      "privateKeys": [toHex(privKeys[0])],
-      "schnorrPublicKeys": [toHex(schnorrPubKeys[0])],
-      "script": toHex(taprootScript),
-      "address": taprootAddress
-    },
-    {
-      "title": "Taproot: Multi-Leaf 2/3 Multisig",
-      "privateKeys": privKeys.map(p => toHex(p)),
-      "schnorrPublicKeys": schnorrPubKeys.map(p => toHex(p)),
-      "script": toHex(taprootScriptNS),
-      "leafScripts": taprootLeafScriptsNS.map(s => toHex(s.script)),
-      "address": taprootAddressNS
-    },
-  ]
-
   return (
     <div className="App">
       <h1>Micro-BTC Web Demo</h1>
  
       <div className='App-main'>
-        {sections.map((section, index) => (
+        {scriptSections.map((section, index) => (
           <div key={index}>
             <h2>{section.title}</h2>
             {section.privateKeys ? <p>
-              <b>Private Keys:</b><br/>
+              <b>Private Key{section.privateKeys.length > 1 ? 's' : ''}:</b><br/>
               {section.privateKeys.map((privKey, index) => 
                 <span key={index}>{privKey}<br/></span>
               )}
             </p> : null }
-            {section.publicKeys ? <p>
-              <b>Public Keys:</b><br/>
-              {section.publicKeys.map((pubKey, index) => 
-                <span key={index}>{pubKey}<br/></span>
-              )}
-            </p> : null }
-            {section.schnorrPublicKeys ? <p>
-              <b>Schnorr Public Keys:</b><br/>
-              {section.schnorrPublicKeys.map((pubKey, index) => 
+            {section.pubKeys ? <p>
+              <b>{section.pubKeyType} Public Key{section.pubKeys.length > 1 ? 's' : ''}:</b><br/>
+              {section.pubKeys.map((pubKey, index) => 
                 <span key={index}>{pubKey}<br/></span>
               )}
             </p> : null }
