@@ -5,9 +5,9 @@ import * as secp from '@noble/secp256k1'
 const toHex = secp.utils.bytesToHex;
 
 // Public Keys
-let privKeys = [];
-let pubKeys = [];
-let schnorrPubKeys = [];
+let privKeys: Uint8Array[] = [];
+let pubKeys: Uint8Array[] = [];
+let schnorrPubKeys: Uint8Array[] = [];
 for (var i = 0; i < 3; i++) {
   const privKey = secp.utils.randomPrivateKey();
   privKeys.push(privKey);
@@ -131,64 +131,3 @@ function App() {
 }
 
 export default App
-
-
-/*
-const privKey1 = secp.utils.randomPrivateKey();
-const privKey2 = secp.utils.randomPrivateKey(); 
-const privKey3 = secp.utils.randomPrivateKey();
-const pubKey1 = secp.getPublicKey(privKey1, true);
-const pubKey2 = secp.getPublicKey(privKey2, true);
-const pubKey3 = secp.getPublicKey(privKey3, true);
-const realPubKeys = [pubKey1, pubKey2, pubKey3];
-const dummyPubKeys = [
-  hex.decode('030000000000000000000000000000000000000000000000000000000000000001'),
-  hex.decode('030000000000000000000000000000000000000000000000000000000000000002'),
-  hex.decode('030000000000000000000000000000000000000000000000000000000000000003'),
-];
-const dummySchnorrPubKeys = [
-  hex.decode('0101010101010101010101010101010101010101010101010101010101010101'),
-]
-// Schnorr
-const schnorrPubKey1 = secp.schnorr.getPublicKey(privKey1);
-const schnorrPubKey2 = secp.schnorr.getPublicKey(privKey2);
-const schnorrPubKey3 = secp.schnorr.getPublicKey(privKey3);
-const schnorrPubKeys = [schnorrPubKey1, schnorrPubKey2, schnorrPubKey3];
-*/
-
-/*<h3>Witness Public Key Hash</h3>
-<p><b>Public key:</b><br/>{toHex(pubKey1)}</p>
-<p><b>Script:</b><br/>{toHex(pubKeyScript)}</p>
-<p><b>Address:</b><br/>{pkhAddress}</p>
-
-<h3>Witness Script Hash of a 2/3 Multisig</h3>
-<p>
-  <b>Public Keys:</b><br/>
-  {realPubKeys.map(pubKey => 
-    <span>{toHex(pubKey)}<br/></span>
-  )}
-</p>
-<p><b>Script:</b><br/>{toHex(multisigScript)}</p>
-<p><b>Script hash:</b><br/>{toHex(multisigScriptHash)}</p>
-  <p><b>Address:</b><br/>{multisigAddress}</p>*/
-
-/*<div className="card">
-<button onClick={() => setCount((count) => count + 1)}>
-  count is {count}
-</button>
-</div>*/
-
-/*<h3>Witness Script Hash of a Public Key Hash</h3>
-<p><b>Public key:</b> {toHex(pubKey1)}</p>
-<p><b>Script:</b> {toHex(pubKeyHashScript)}</p>
-<p><b>Script hash:</b> {toHex(wshPubKeyHashScript)}</p>
-<p><b>Address:</b> {wshPkhAddress}</p>*/
-
-/*{
-  "title": "Taproot: Single-Leaf 2/3 Multisig",
-  "publicKeys": schnorrPubKeys.map(p => toHex(p)),
-}*/
-
-// Taproot: Single-Leaf 2/3 Multisig (EXPERIMENTAL)
-//const taprootScriptInfoMS = btc.p2tr_ms(2, schnorrPubKeys);
-//console.log(taprootScriptInfoMS);
