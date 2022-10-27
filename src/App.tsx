@@ -33,7 +33,6 @@ type ScriptSection = {
 
 let scriptSections: ScriptSection[] = []
 
-// Classic public key hash
 const classicPKHInfo = btc.p2pkh(keySets[0].ecdsaPubKey)
 scriptSections.push({
   "title": "Classic Public Key Hash",
@@ -42,6 +41,18 @@ scriptSections.push({
   "script": toHex(classicPKHInfo.script),
   "scriptHash": "",
   "address": classicPKHInfo.address,
+  "pubKeyType": "ECDSA"
+})
+
+const classicMultisigScriptInfo = btc.p2ms(2, keySets.map(keySet => keySet.ecdsaPubKey))
+const classicMultisigScriptHashinfo = btc.p2sh(classicMultisigScriptInfo)
+scriptSections.push({
+  "title": "Classic Script Hash: 2/3 Multisig",
+  "privateKeys": keySets.map(k => toHex(k.privKey)),
+  "pubKeys": keySets.map(k => toHex(k.ecdsaPubKey)),
+  "script": toHex(classicMultisigScriptInfo.script),
+  "scriptHash": toHex(classicMultisigScriptHashinfo.script),
+  "address": classicMultisigScriptHashinfo.address,
   "pubKeyType": "ECDSA"
 })
 
@@ -88,6 +99,17 @@ scriptSections.push({
   "script": toHex(taprootScriptInfoNS.script),
   "leafScripts": taprootLeafScriptsNS.map(s => toHex(s.script)),
   "address": taprootScriptInfoNS.address,
+  "pubKeyType": "Schnorr"
+})
+
+const taprootSingleLeafScriptMS = btc.p2tr_ms(2, keySets.map(k => k.schnorrPubKey))
+const taprootScriptInfoMS = btc.p2tr(undefined, taprootSingleLeafScriptMS)
+scriptSections.push({
+  "title": "Taproot: Single-Leaf 2/3 Multisig",
+  "privateKeys": keySets.map(k => toHex(k.privKey)),
+  "pubKeys": keySets.map(k => toHex(k.schnorrPubKey)),
+  "script": toHex(taprootScriptInfoMS.script),
+  "leafScripts": [toHex(taprootSingleLeafScriptMS.script)],
   "pubKeyType": "Schnorr"
 })
 
