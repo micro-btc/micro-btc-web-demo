@@ -129,7 +129,7 @@ scriptSections.push({
 function App() {
   return (
     <div className="App">
-      <h1>Micro-BTC Web Demo</h1>
+      <h1>MICRO-BTC Web Demo</h1>
  
       <div className='App-main'>
         {scriptSections.map((section, index) => (
