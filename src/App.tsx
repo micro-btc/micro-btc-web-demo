@@ -1,7 +1,14 @@
 import './App.css'
 import * as btc from 'micro-btc-signer'
 import * as secp from '@noble/secp256k1'
+import { hex } from '@scure/base';
 const toHex = secp.utils.bytesToHex
+
+const testKeys = [
+  { schnorr: hex.decode('0101010101010101010101010101010101010101010101010101010101010101') },
+  { schnorr: hex.decode('0202020202020202020202020202020202020202020202020202020202020202') },
+  { schnorr: hex.decode('1212121212121212121212121212121212121212121212121212121212121212') },
+]
 
 type KeySet = {
   privKey: Uint8Array,
@@ -18,6 +25,11 @@ for (var i = 0; i < 3; i++) {
     ecdsaPubKey: secp.getPublicKey(privKey, true),
     schnorrPubKey: secp.schnorr.getPublicKey(privKey)
   })
+  /*keySets.push({
+    privKey: privKey,
+    ecdsaPubKey: secp.getPublicKey(privKey, true),
+    schnorrPubKey: testKeys[i].schnorr
+  })*/
 }
 
 type ScriptSection = {
@@ -96,8 +108,8 @@ scriptSections.push({
   "title": "Taproot: Multi-Leaf 2/3 Multisig",
   "privateKeys": keySets.map(k => toHex(k.privKey)),
   "pubKeys": keySets.map(k => toHex(k.schnorrPubKey)),
-  "script": toHex(taprootScriptInfoNS.script),
   "leafScripts": taprootLeafScriptsNS.map(s => toHex(s.script)),
+  "script": toHex(taprootScriptInfoNS.script),
   "address": taprootScriptInfoNS.address,
   "pubKeyType": "Schnorr"
 })
@@ -108,8 +120,9 @@ scriptSections.push({
   "title": "Taproot: Single-Leaf 2/3 Multisig",
   "privateKeys": keySets.map(k => toHex(k.privKey)),
   "pubKeys": keySets.map(k => toHex(k.schnorrPubKey)),
-  "script": toHex(taprootScriptInfoMS.script),
   "leafScripts": [toHex(taprootSingleLeafScriptMS.script)],
+  "script": toHex(taprootScriptInfoMS.script),
+  "address": taprootScriptInfoMS.address,
   "pubKeyType": "Schnorr"
 })
 
