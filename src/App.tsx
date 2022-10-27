@@ -1,14 +1,14 @@
 import './App.css'
 import * as btc from 'micro-btc-signer'
 import * as secp from '@noble/secp256k1'
-import { hex } from '@scure/base';
 const toHex = secp.utils.bytesToHex
+//import { hex } from '@scure/base';
 
-const testKeys = [
+/*const testKeys = [
   { schnorr: hex.decode('0101010101010101010101010101010101010101010101010101010101010101') },
   { schnorr: hex.decode('0202020202020202020202020202020202020202020202020202020202020202') },
   { schnorr: hex.decode('1212121212121212121212121212121212121212121212121212121212121212') },
-]
+]*/
 
 type KeySet = {
   privKey: Uint8Array,
