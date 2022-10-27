@@ -1,4 +1,4 @@
-# Micro-BTC Web Demo
+# micro-btc web demo
 
 ## About
 
