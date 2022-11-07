@@ -18,7 +18,20 @@ const keySetsTesting = [
     priv: hex.decode('0000000000000000000000000000000000000000000000000000000000000003'),
     ecdsaPub: hex.decode('030000000000000000000000000000000000000000000000000000000000000003'),
     schnorrPub: hex.decode('1212121212121212121212121212121212121212121212121212121212121212')
+  }
+]
+const keySetsTesting2 = [
+  keySetsTesting[0], keySetsTesting[1], keySetsTesting[2],
+  {
+    priv: hex.decode('0000000000000000000000000000000000000000000000000000000000000004'),
+    ecdsaPub: hex.decode('030000000000000000000000000000000000000000000000000000000000000004'),
+    schnorrPub: hex.decode('2323232323232323232323232323232323232323232323232323232323232323')
   },
+  {
+    priv: hex.decode('0000000000000000000000000000000000000000000000000000000000000005'),
+    ecdsaPub: hex.decode('030000000000000000000000000000000000000000000000000000000000000005'),
+    schnorrPub: hex.decode('3434343434343434343434343434343434343434343434343434343434343434')
+  }
 ]
 
 type KeySet = {
@@ -150,30 +163,30 @@ scriptSections.push({
   "pubKeyType": "Schnorr"
 })
 
-const taprootLeafScriptsNS_AorBC3 = [
-  btc.p2tr_pk(keySets[0].schnorrPub),
-  btc.p2tr_ns(2, [keySets[1].schnorrPub, keySets[2].schnorrPub])[0]
-]
-const taprootScriptInfoNS_AorBC3 = btc.p2tr(undefined, taprootLeafScriptsNS_AorBC3)
-scriptSections.push({
-  "title": "Taproot Multi-Leaf: A or (B&C)",
-  "privateKeys": keySets.map(k => hex.encode(k.priv)),
-  "publicKeys": keySets.map(k => hex.encode(k.schnorrPub)),
-  "leafScripts": taprootLeafScriptsNS_AorBC3.map(s => hex.encode(s.script)),
-  "script": hex.encode(taprootScriptInfoNS_AorBC3.script),
-  "address": taprootScriptInfoNS_AorBC3.address,
-  "pubKeyType": "Schnorr"
-})
-
 const taprootLeafScriptsNS_AorBC4 = btc.p2tr_ns(2, [keySets[1].schnorrPub, keySets[2].schnorrPub])
 const taprootScriptInfoNS_AorBC4 = btc.p2tr(keySets[0].schnorrPub, taprootLeafScriptsNS_AorBC4)
 scriptSections.push({
-  "title": "Taproot Multi-Leaf: A or (B&C) #2",
+  "title": "Taproot Multi-Leaf: A or (B&C)",
   "privateKeys": keySets.map(k => hex.encode(k.priv)),
   "publicKeys": keySets.map(k => hex.encode(k.schnorrPub)),
   "leafScripts": taprootLeafScriptsNS_AorBC4.map(s => hex.encode(s.script)),
   "script": hex.encode(taprootScriptInfoNS_AorBC4.script),
   "address": taprootScriptInfoNS_AorBC4.address,
+  "pubKeyType": "Schnorr"
+})
+
+const taprootLeafScript_NS_AorBCorDE = [
+  btc.p2tr_ns(2, [keySetsTesting2[1].schnorrPub, keySetsTesting2[2].schnorrPub])[0],
+  btc.p2tr_ns(2, [keySetsTesting2[0].schnorrPub, keySetsTesting2[1].schnorrPub])[0]
+]
+const taprootScriptInfo_NS_AorBCorBD = btc.p2tr(keySetsTesting2[0].schnorrPub, taprootLeafScript_NS_AorBCorDE)
+scriptSections.push({
+  "title": "Taproot Multi-Leaf: A or (B&C) or (D&E)",
+  "privateKeys": keySetsTesting2.map(k => hex.encode(k.priv)),
+  "publicKeys": keySetsTesting2.map(k => hex.encode(k.schnorrPub)),
+  "leafScripts": taprootLeafScript_NS_AorBCorDE.map(s => hex.encode(s.script)),
+  "script": hex.encode(taprootScriptInfo_NS_AorBCorBD.script),
+  "address": taprootScriptInfo_NS_AorBCorBD.address,
   "pubKeyType": "Schnorr"
 })
 
