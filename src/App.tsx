@@ -107,11 +107,22 @@ scriptSections.push({
 
 const taprootScriptInfo = btc.p2tr(keySets[0].schnorrPub)
 scriptSections.push({
-  "title": "Taproot: Single Public Key",
+  "title": "Taproot: Public Key",
   "privateKeys": [hex.encode(keySets[0].priv)],
   "publicKeys": [hex.encode(keySets[0].schnorrPub)],
   "script": hex.encode(taprootScriptInfo.script),
   "address": taprootScriptInfo.address,
+  "pubKeyType": "Schnorr"
+})
+
+const taprootPKHLeafScriptInfo = [btc.p2tr_pk(keySets[0].schnorrPub)]
+const taprootPKHScriptInfo = btc.p2tr(undefined, taprootPKHLeafScriptInfo)
+scriptSections.push({
+  "title": "Taproot: Public Key Hash",
+  "privateKeys": [hex.encode(keySets[0].priv)],
+  "publicKeys": [hex.encode(keySets[0].schnorrPub)],
+  "script": hex.encode(taprootPKHScriptInfo.script),
+  "address": taprootPKHScriptInfo.address,
   "pubKeyType": "Schnorr"
 })
 
@@ -151,6 +162,18 @@ scriptSections.push({
   "leafScripts": taprootLeafScriptsNS_AorBC3.map(s => hex.encode(s.script)),
   "script": hex.encode(taprootScriptInfoNS_AorBC3.script),
   "address": taprootScriptInfoNS_AorBC3.address,
+  "pubKeyType": "Schnorr"
+})
+
+const taprootLeafScriptsNS_AorBC4 = btc.p2tr_ns(2, [keySets[1].schnorrPub, keySets[2].schnorrPub])
+const taprootScriptInfoNS_AorBC4 = btc.p2tr(keySets[0].schnorrPub, taprootLeafScriptsNS_AorBC4)
+scriptSections.push({
+  "title": "Taproot Multi-Leaf: A or (B&C) #2",
+  "privateKeys": keySets.map(k => hex.encode(k.priv)),
+  "publicKeys": keySets.map(k => hex.encode(k.schnorrPub)),
+  "leafScripts": taprootLeafScriptsNS_AorBC4.map(s => hex.encode(s.script)),
+  "script": hex.encode(taprootScriptInfoNS_AorBC4.script),
+  "address": taprootScriptInfoNS_AorBC4.address,
   "pubKeyType": "Schnorr"
 })
 
