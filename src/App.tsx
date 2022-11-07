@@ -1,18 +1,7 @@
 import './App.css'
 import * as btc from 'micro-btc-signer'
 import * as secp from '@noble/secp256k1'
-const toHex = secp.utils.bytesToHex
-import { hex } from '@scure/base';
-
-export const makeScriptTRNS = (pubkeys: Uint8Array[]) => {
-  return {
-    type: 'tr_ns',
-    script: btc.OutScript.encode({
-      type: 'tr_ns',
-      pubkeys: pubkeys
-    })
-  }
-}
+import { hex } from '@scure/base'
 
 const keySetsTesting = [
   {
@@ -43,7 +32,7 @@ let keySetsProduction: KeySet[] = []
 for (var i = 0; i < 3; i++) {
   const priv = secp.utils.randomPrivateKey()
   keySetsProduction.push({
-    priv: priv,
+    priv,
     ecdsaPub: secp.getPublicKey(priv, true),
     schnorrPub: secp.schnorr.getPublicKey(priv)
   })
@@ -55,7 +44,7 @@ const keySets = keySetsTesting // keySetsProduction
 // Create alternate lists of keys
 //const privKeys = keySets.map(keySet => keySet.priv)
 //const ecdsaPubs = keySets.map(keySet => keySet.ecdsaPub)
-const schnorrPubs = keySets.map(keySet => keySet.schnorrPub)
+//const schnorrPubs = keySets.map(keySet => keySet.schnorrPub)
 
 type ScriptSection = {
   title: string,
@@ -73,9 +62,9 @@ let scriptSections: ScriptSection[] = []
 const classicPKHInfo = btc.p2pkh(keySets[0].ecdsaPub)
 scriptSections.push({
   "title": "Classic Public Key Hash",
-  "privateKeys": [toHex(keySets[0].priv)],
-  "publicKeys": [toHex(keySets[0].ecdsaPub)],
-  "script": toHex(classicPKHInfo.script),
+  "privateKeys": [hex.encode(keySets[0].priv)],
+  "publicKeys": [hex.encode(keySets[0].ecdsaPub)],
+  "script": hex.encode(classicPKHInfo.script),
   "scriptHash": "",
   "address": classicPKHInfo.address,
   "pubKeyType": "ECDSA"
@@ -85,21 +74,20 @@ const classicMultisigScriptInfo = btc.p2ms(2, keySets.map(keySet => keySet.ecdsa
 const classicMultisigScriptHashinfo = btc.p2sh(classicMultisigScriptInfo)
 scriptSections.push({
   "title": "Classic Script Hash: 2 of {A, B, C}",
-  "privateKeys": keySets.map(k => toHex(k.priv)),
-  "publicKeys": keySets.map(k => toHex(k.ecdsaPub)),
-  "script": toHex(classicMultisigScriptInfo.script),
-  "scriptHash": toHex(classicMultisigScriptHashinfo.script),
+  "privateKeys": keySets.map(k => hex.encode(k.priv)),
+  "publicKeys": keySets.map(k => hex.encode(k.ecdsaPub)),
+  "script": hex.encode(classicMultisigScriptInfo.script),
+  "scriptHash": hex.encode(classicMultisigScriptHashinfo.script),
   "address": classicMultisigScriptHashinfo.address,
   "pubKeyType": "ECDSA"
 })
 
-// Witness public key hash
 const witnessPKHInfo = btc.p2wpkh(keySets[0].ecdsaPub)
 scriptSections.push({
   "title": "Witness Public Key Hash",
-  "privateKeys": [toHex(keySets[0].priv)],
-  "publicKeys": [toHex(keySets[0].ecdsaPub)],
-  "script": toHex(witnessPKHInfo.script),
+  "privateKeys": [hex.encode(keySets[0].priv)],
+  "publicKeys": [hex.encode(keySets[0].ecdsaPub)],
+  "script": hex.encode(witnessPKHInfo.script),
   "scriptHash": "",
   "address": witnessPKHInfo.address,
   "pubKeyType": "ECDSA"
@@ -109,10 +97,10 @@ const multisigScriptInfo = btc.p2ms(2, keySets.map(k => k.ecdsaPub))
 const wshMultisigInfo = btc.p2wsh(multisigScriptInfo)
 scriptSections.push({
   "title": "Witness Script Hash: 2 of {A, B, C}",
-  "privateKeys": keySets.map(k => toHex(k.priv)),
-  "publicKeys": keySets.map(k => toHex(k.ecdsaPub)),
-  "script": toHex(multisigScriptInfo.script),
-  "scriptHash": toHex(wshMultisigInfo.script),
+  "privateKeys": keySets.map(k => hex.encode(k.priv)),
+  "publicKeys": keySets.map(k => hex.encode(k.ecdsaPub)),
+  "script": hex.encode(multisigScriptInfo.script),
+  "scriptHash": hex.encode(wshMultisigInfo.script),
   "address": wshMultisigInfo.address,
   "pubKeyType": "ECDSA"
 })
@@ -120,9 +108,9 @@ scriptSections.push({
 const taprootScriptInfo = btc.p2tr(keySets[0].schnorrPub)
 scriptSections.push({
   "title": "Taproot: Single Public Key",
-  "privateKeys": [toHex(keySets[0].priv)],
-  "publicKeys": [toHex(keySets[0].schnorrPub)],
-  "script": toHex(taprootScriptInfo.script),
+  "privateKeys": [hex.encode(keySets[0].priv)],
+  "publicKeys": [hex.encode(keySets[0].schnorrPub)],
+  "script": hex.encode(taprootScriptInfo.script),
   "address": taprootScriptInfo.address,
   "pubKeyType": "Schnorr"
 })
@@ -131,10 +119,10 @@ const taprootLeafScriptsNS = btc.p2tr_ns(2, keySets.map(k => k.schnorrPub))
 const taprootScriptInfoNS = btc.p2tr(undefined, taprootLeafScriptsNS)
 scriptSections.push({
   "title": "Taproot Multi-Leaf: (A&B) or (A&C) or (B&C)",
-  "privateKeys": keySets.map(k => toHex(k.priv)),
-  "publicKeys": keySets.map(k => toHex(k.schnorrPub)),
-  "leafScripts": taprootLeafScriptsNS.map(s => toHex(s.script)),
-  "script": toHex(taprootScriptInfoNS.script),
+  "privateKeys": keySets.map(k => hex.encode(k.priv)),
+  "publicKeys": keySets.map(k => hex.encode(k.schnorrPub)),
+  "leafScripts": taprootLeafScriptsNS.map(s => hex.encode(s.script)),
+  "script": hex.encode(taprootScriptInfoNS.script),
   "address": taprootScriptInfoNS.address,
   "pubKeyType": "Schnorr"
 })
@@ -143,26 +131,26 @@ const taprootSingleLeafScriptMS = btc.p2tr_ms(2, keySets.map(k => k.schnorrPub))
 const taprootScriptInfoMS = btc.p2tr(undefined, taprootSingleLeafScriptMS)
 scriptSections.push({
   "title": "Taproot Single-Leaf: 2 of {A, B, C}",
-  "privateKeys": keySets.map(k => toHex(k.priv)),
-  "publicKeys": keySets.map(k => toHex(k.schnorrPub)),
-  "leafScripts": [toHex(taprootSingleLeafScriptMS.script)],
-  "script": toHex(taprootScriptInfoMS.script),
+  "privateKeys": keySets.map(k => hex.encode(k.priv)),
+  "publicKeys": keySets.map(k => hex.encode(k.schnorrPub)),
+  "leafScripts": [hex.encode(taprootSingleLeafScriptMS.script)],
+  "script": hex.encode(taprootScriptInfoMS.script),
   "address": taprootScriptInfoMS.address,
   "pubKeyType": "Schnorr"
 })
 
-const taprootLeafScriptsNS_AorBC2 = [
-  makeScriptTRNS([schnorrPubs[0]]),
-  makeScriptTRNS([schnorrPubs[1], schnorrPubs[2]]),
+const taprootLeafScriptsNS_AorBC3 = [
+  btc.p2tr_pk(keySets[0].schnorrPub),
+  btc.p2tr_ns(2, [keySets[1].schnorrPub, keySets[2].schnorrPub])[0]
 ]
-const taprootScriptInfoNS_AorBC2 = btc.p2tr(undefined, taprootLeafScriptsNS_AorBC2)
+const taprootScriptInfoNS_AorBC3 = btc.p2tr(undefined, taprootLeafScriptsNS_AorBC3)
 scriptSections.push({
   "title": "Taproot Multi-Leaf: A or (B&C)",
-  "privateKeys": keySets.map(k => toHex(k.priv)),
-  "publicKeys": keySets.map(k => toHex(k.schnorrPub)),
-  "leafScripts": taprootLeafScriptsNS_AorBC2.map(s => toHex(s.script)),
-  "script": toHex(taprootScriptInfoNS_AorBC2.script),
-  "address": taprootScriptInfoNS_AorBC2.address,
+  "privateKeys": keySets.map(k => hex.encode(k.priv)),
+  "publicKeys": keySets.map(k => hex.encode(k.schnorrPub)),
+  "leafScripts": taprootLeafScriptsNS_AorBC3.map(s => hex.encode(s.script)),
+  "script": hex.encode(taprootScriptInfoNS_AorBC3.script),
+  "address": taprootScriptInfoNS_AorBC3.address,
   "pubKeyType": "Schnorr"
 })
 
@@ -206,36 +194,3 @@ function App() {
 }
 
 export default App
-
-/*[
-  {
-    type: 'tr_ns',
-    script: btc.OutScript.encode({
-      type: 'tr_ns', pubkeys: [keySets[0].schnorrPub]
-    })
-  },
-  {
-    type: 'tr_ns',
-    script: btc.OutScript.encode({
-      type: 'tr_ns', pubkeys: [keySets[1].schnorrPub, keySets[2].schnorrPub]
-    })
-  }
-]*/
-
-/*const keySetAABC = [keySets[0]].concat(keySets)
-const taprootLeafScriptsNS_AorBC = btc.p2tr_ns(2, keySetAABC.map(k => k.schnorrPub), true)
-const taprootScriptInfoNS_AorBC = btc.p2tr(undefined, taprootLeafScriptsNS_AorBC)
-scriptSections.push({
-  "title": "Taproot: Multi-Leaf: A|(B&C)",
-  "privateKeys": keySetAABC.map(k => toHex(k.priv)),
-  "pubKeys": keySetAABC.map(k => toHex(k.schnorrPub)),
-  "leafScripts": taprootLeafScriptsNS_AorBC.map(s => toHex(s.script)),
-  "script": toHex(taprootScriptInfoNS_AorBC.script),
-  "address": taprootScriptInfoNS_AorBC.address,
-  "pubKeyType": "Schnorr"
-})*/
-  /*keySets.push({
-    priv: priv,
-    ecdsaPub: secp.getPublicKey(priv, true),
-    schnorrPub: testKeys[i].schnorr
-  })*/
